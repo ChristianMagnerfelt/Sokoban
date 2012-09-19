@@ -16,24 +16,33 @@
 class Board
 {
 	public:
+		Board(){}
 		struct Position
 		{
-			size_t x;
-			size_t y;	
-		}
-		typedef std::vector<std::string> BoardContainer;
-		typedef std::vector<std::vector<size_t>> IDMatrix;
+			Position() : x(0), y(0){}
+			Position(unsigned int newX, unsigned int newY) : x(newX), y(newY){}
+			unsigned int x;
+			unsigned int y;	
+		};
 
 		void addRowToBoard(std::string &&);
-		void constructIDMatrix();
+		void initialize();
+
 		void printBoard() const;
+		void printIDMatrix() const;
+		void printBoxes() const;
+		void printGoals() const;
+		void printPlayerPosition() const;
 
 		const std::string operator[](size_t pos){ return board[pos]; }
 
 		size_t idAt(size_t row, size_t col){ return positionIDs[row][col]; }
 	private:
-		BoardContainer board;
-		static const IDMatrix positionIDs;
+		Position playerPosition;
+		std::vector<Position> boxes;
+		std::vector<std::string> visitedMatrix;
+		static std::vector<Position> goals;
+		static std::vector<std::string> board;
+		static std::vector<std::vector<unsigned int>> positionIDs;
 };
-
 #endif
