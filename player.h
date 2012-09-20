@@ -9,10 +9,7 @@ class Player
 {
 	public:
 		void findPossiblePushes();
-		void findAllPaths();
-		void pushBox(Board &);
-		void start(Board &);
-
+		void start(Board & board);
 	private:
 		
 };

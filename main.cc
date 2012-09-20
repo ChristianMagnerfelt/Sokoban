@@ -31,11 +31,14 @@ int main(int pArgC, char* pArgs[])
 		startBoard.addRowToBoard(std::move(lLine));
 	}
 	startBoard.initialize();
-	startBoard.printBoard();
-	startBoard.printIDMatrix();
-	startBoard.printPlayerPosition();
-	startBoard.printBoxes();
-	startBoard.printGoals();
+	//startBoard.printBoard();
+	//startBoard.printIDMatrix();
+	//startBoard.printPlayerPosition();
+	//startBoard.printBoxes();
+	//startBoard.printGoals();
+
+	player.start(startBoard);
+	startBoard.printVisitedMatrix();
 
 	//send the solution to the server
 	//lSocket.WriteLine(lMySol);
