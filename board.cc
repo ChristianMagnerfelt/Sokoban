@@ -92,7 +92,7 @@ void Board::printGoals() const
 }
 void Board::printPlayerPosition() const
 {
-	std::cout << "Player position : (" << playerPosition.x << "," << playerPosition.y << ")" << std::endl;
+	std::cout << "Player position is : (" << playerPosition.x << "," << playerPosition.y << ")" << std::endl;
 }
 
 void Board::printVisitedMatrix() const
