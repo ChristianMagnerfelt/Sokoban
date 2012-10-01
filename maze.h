@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <limits>
 #include <queue>
 #include <vector>
 
@@ -32,24 +33,40 @@ public:
 private:
     std::vector<std::vector<Tile> > tiles;
 public:
+    
     Maze();
+    
     Tile const& operator () (position) const;
     Tile& operator () (position);
     Tile const& operator () (size_t, size_t) const;
     Tile& operator () (size_t, size_t);
+    
     friend std::ostream& operator << (std::ostream&, Maze const&);
-//    void get_neighbors(position, std::queue<position>&) const;
-//    size_t width() const;
+    
     size_t height() const;
     size_t width(size_t) const;
     void add_row(size_t);
     
-    bool valid(position const&) const;
+    /**
+     * Is pos on the board?
+     */
+    bool valid(position const& pos) const;
     
+    /**
+     * Determine all neighboring positions of pos on the
+     * board, given obstacles.
+     */
     void get_neighbors(std::queue<position>& output,
                        position const& pos,
                        std::vector<position> const& obstacles) const;
     
+    /**
+     * Find a path from source to target on the
+     * board, given obstacles. Returns the path in
+     * output from <em>target</em> to <em>source</em>
+     * (because that's more logical) including the
+     * source and target.
+     */
     void find_path(position const& source,
                    position const& target,
                    std::vector<position> const& obstacles,
@@ -58,6 +75,10 @@ public:
     bool walkable(Maze::position const& pos,
                   std::vector<Maze::position> const& obstacles) const;
     
+    /**
+     * Check if there's a path from source to target on the
+     * board, given obstacles.
+     */
     bool reachable(Maze::position const& source,
                    Maze::position const& target,
                    std::vector<Maze::position> const& obstacles) const;
@@ -74,6 +95,8 @@ public:
     void                  add_crates_ending_pos(Maze::position const&);
     std::vector<Maze::position> const& get_crates_ending_pos() const;
 };
+
+/* Helper functions */
 
 inline
 Maze::position up(Maze::position const& pos) {
