@@ -8,38 +8,24 @@
 
 #include "maze.h"
 
-Maze::Tile::Tile():
-    type(Maze::Tile::Floor),
-    source_displacement(std::numeric_limits<size_t>::max()),
-    target_displacement(std::numeric_limits<size_t>::max()),
-    walkable(true)
-{}
-
-inline bool Maze::Tile::isWalkable() const { return walkable; }
-
-void Maze::Tile::setType(Maze::Tile::Type value) {
-	walkable = (value == Maze::Tile::Obstacle)?false:true;
-	type = value;
-}
-
 Maze::Maze():
     tiles()
 {}
 
-Maze::Tile const& Maze::operator () (Maze::position pos) const {
+Tile const& Maze::operator () (Maze::position pos) const {
     return (*this)(pos.first, pos.second);
 }
 
-Maze::Tile& Maze::operator () (Maze::position pos) {
+Tile & Maze::operator () (Maze::position pos) {
     return (*this)(pos.first, pos.second);
 }
 
-Maze::Tile const& Maze::operator () (size_t x, size_t y) const {
+Tile const& Maze::operator () (size_t x, size_t y) const {
     assert(y < this->height() && x < tiles[y].size());
     return tiles[y][x];
 }
 
-Maze::Tile& Maze::operator () (size_t x, size_t y) {
+Tile & Maze::operator () (size_t x, size_t y) {
     assert(y < this->height() && x < tiles[y].size());
     return tiles[y][x];
 }

@@ -33,5 +33,6 @@ add_executable(client
     maze.cc
     node.cc
     csocket.cc
+    tile.cc
 )
 

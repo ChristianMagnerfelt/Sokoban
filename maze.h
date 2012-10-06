@@ -8,26 +8,11 @@
 #include <queue>
 #include <vector>
 
+#include "tile.h"
+
 class Maze {
 public:
-    typedef std::pair<std::size_t, std::size_t> position;
-    class Tile {
-    public:
-        enum Type {
-            Floor,
-            Obstacle,
-            Dest
-        } type;
-        void setType(Type value);
-        
-        std::size_t source_displacement;
-        std::size_t target_displacement;
-        
-        Tile();
-        inline bool isWalkable() const;
-    private:
-    	bool walkable;
-    };
+	typedef std::pair<std::size_t, std::size_t> position;
     
     position                player_starting_pos;
     std::vector<position>   crates_starting_pos;
@@ -129,7 +114,7 @@ inline std::ostream& operator << (std::ostream& stream, Maze::position pos) {
 inline std::ostream& operator << (std::ostream& stream, Maze const& maze) {
     for (size_t y = 0; y < maze.tiles.size(); y++) {
         for (size_t x = 0; x < maze.tiles[y].size(); x++) {
-            if (maze.tiles[y][x].type != Maze::Tile::Obstacle) {
+            if (maze.tiles[y][x].type != Tile::Obstacle) {
                 if (maze.tiles[y][x].target_displacement == std::numeric_limits<size_t>::max())
                     stream << 'X';
                 else

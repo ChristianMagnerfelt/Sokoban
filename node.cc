@@ -141,10 +141,10 @@ void Node::get_successors(std::queue<Node>& nodes) const {
                 std::string path = code;
                 while (implementation->maze.isWalkable(crate, implementation->crates_ending_pos)) {
                     new_crates_ending_pos[i] = crate;
-                    if ((implementation->maze(up(crate)).type == Maze::Tile::Obstacle && implementation->maze(right(crate)).type == Maze::Tile::Obstacle)
-                     || (implementation->maze(right(crate)).type == Maze::Tile::Obstacle && implementation->maze(down(crate)).type == Maze::Tile::Obstacle)
-                     || (implementation->maze(down(crate)).type == Maze::Tile::Obstacle && implementation->maze(left(crate)).type == Maze::Tile::Obstacle)
-                     || (implementation->maze(left(crate)).type == Maze::Tile::Obstacle && implementation->maze(up(crate)).type == Maze::Tile::Obstacle)) {
+                    if ((implementation->maze(up(crate)).type == Tile::Obstacle && implementation->maze(right(crate)).type == Tile::Obstacle)
+                     || (implementation->maze(right(crate)).type == Tile::Obstacle && implementation->maze(down(crate)).type == Tile::Obstacle)
+                     || (implementation->maze(down(crate)).type == Tile::Obstacle && implementation->maze(left(crate)).type == Tile::Obstacle)
+                     || (implementation->maze(left(crate)).type == Tile::Obstacle && implementation->maze(up(crate)).type == Tile::Obstacle)) {
                     } else {
                         nodes.push(Node(*this, player_start_pos, implementation->crates_ending_pos, new_crates_ending_pos, path));
                     }
@@ -303,16 +303,16 @@ std::ostream& operator << (std::ostream& stream, Node const& node) {
             }
             bool is_player = Maze::position(x, y)
                                     == node.get_player_ending_pos();
-            if (node.implementation->maze(x, y).type == Maze::Tile::Floor) {
+            if (node.implementation->maze(x, y).type == Tile::Floor) {
                 if (is_player)
                     stream << '@';
                 else if (is_crate)
                     stream << '$';
                 else
                     stream << ' ';
-            } else if (node.implementation->maze(x, y).type == Maze::Tile::Obstacle) {
+            } else if (node.implementation->maze(x, y).type == Tile::Obstacle) {
                 stream << '#';
-            } else if (node.implementation->maze(x, y).type == Maze::Tile::Dest) {
+            } else if (node.implementation->maze(x, y).type == Tile::Dest) {
                 if (is_player)
                     stream << '+';
                 else if (is_crate)
