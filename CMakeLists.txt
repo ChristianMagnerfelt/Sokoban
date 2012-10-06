@@ -30,6 +30,7 @@ endif ()
 
 add_executable(client
     main.cc
+    search.cc
     maze.cc
     node.cc
     csocket.cc
