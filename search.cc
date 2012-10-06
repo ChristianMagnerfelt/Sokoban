@@ -22,55 +22,6 @@ std::string path_to_string(std::vector<Maze::position> const& path) {
 }
 
 
-void reverse_search(Maze const& maze,
-                    std::vector<Node> const& root_nodes,
-                    std::vector<Node>& steps) {
-    
-    std::queue<Node>        frontier;
-    std::set<Node>          interior;
-    std::map<Node, Node>    previous;
-    for (Node const& node : root_nodes) {
-        if (node.is_source()) { // Not very likely, but...
-            steps.push_back(node);
-            return;
-        }
-        frontier.push(node);
-    }
-    
-    bool found = false;
-    Node target;
-    while (!found && !frontier.empty()) {
-        if (frontier.empty()) return;
-        Node current = frontier.front();
-        frontier.pop();
-        interior.insert(current);
-        std::queue<Node> neighbors;
-        current.get_predecessors(neighbors);
-        while (!neighbors.empty()) {
-            Node neighbor = neighbors.front();
-            neighbors.pop();
-            if (interior.find(neighbor) == interior.end()) {
-                previous[neighbor] = current;
-                if (neighbor.is_source()) {
-                    found = true;
-                    target = neighbor;
-                    break;
-                }
-                interior.insert(neighbor);
-                frontier.push(neighbor);
-            }
-        }
-    }
-    
-    if (!found) return;
-    
-    // Output solution
-    Node current = target;
-    while (current) {
-        steps.push_back(current);
-        current = previous[current];
-    }
-}
 
 void reverse_best_first_search(Maze const& maze,
                                std::vector<Node> const& root_nodes,
@@ -129,8 +80,8 @@ void forward_best_first_search(Maze const& maze,
     std::priority_queue<Node,
                 std::vector<Node>,
                 Comp_Target_Displacement>   frontier;
-    std::set<Node>          interior;
-    std::map<Node, Node>    previous;
+    std::unordered_set<Node>          interior;
+    std::unordered_map<Node, Node>    previous;
     for (Node const& root : root_nodes) {
         frontier.push(root);
     }
@@ -185,8 +136,8 @@ void bidirectional_search(Maze const& maze,
     std::priority_queue<Node,
                 std::vector<Node>,
                 Comp_Target_Displacement>        frontier_fw;
-    std::set<Node>          interior_fw;
-    std::map<Node, Node>    previous_fw;
+    std::unordered_set<Node>          interior_fw;
+    std::unordered_map<Node, Node>    previous_fw;
     for (Node const& node : initial_nodes) {
         frontier_fw.push(node);
     }
