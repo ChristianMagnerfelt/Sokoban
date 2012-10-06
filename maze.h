@@ -10,7 +10,7 @@
 
 class Maze {
 public:
-    typedef std::pair<size_t, size_t> position;
+    typedef std::pair<std::size_t, std::size_t> position;
     class Tile {
     public:
         enum Type {
@@ -18,12 +18,15 @@ public:
             Obstacle,
             Dest
         } type;
+        void setType(Type value);
         
-        size_t source_displacement;
-        size_t target_displacement;
+        std::size_t source_displacement;
+        std::size_t target_displacement;
         
         Tile();
-        bool walkable() const;
+        inline bool isWalkable() const;
+    private:
+    	bool walkable;
     };
     
     position                player_starting_pos;
@@ -40,6 +43,9 @@ public:
     Tile& operator () (position);
     Tile const& operator () (size_t, size_t) const;
     Tile& operator () (size_t, size_t);
+    
+    inline bool isTileWalkable(const position & pos) const;
+    bool isWalkable(const Maze::position & pos, const std::vector<Maze::position> & obstacles) const;
     
     friend std::ostream& operator << (std::ostream&, Maze const&);
     
@@ -71,9 +77,6 @@ public:
                    position const& target,
                    std::vector<position> const& obstacles,
                    std::vector<position>& output) const;
-    
-    bool walkable(Maze::position const& pos,
-                  std::vector<Maze::position> const& obstacles) const;
     
     /**
      * Check if there's a path from source to target on the
