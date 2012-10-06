@@ -102,6 +102,8 @@ public:
     
     size_t hash() const;
     
+    Node const& get_parent() const;
+    
     Maze::position get_player_starting_pos() const;
     Maze::position get_player_ending_pos() const;
     std::vector<Maze::position> const& get_crates_starting_pos() const;

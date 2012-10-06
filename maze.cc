@@ -1,11 +1,12 @@
 
 #include <cassert>
 #include <limits>
-#include <map>
-#include <set>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
+#include <unordered_set>
 
+#include "direction.h"
 #include "maze.h"
 
 Maze::Maze():
@@ -76,8 +77,10 @@ bool Maze::reachable(Maze::position const& source,
     
     typedef Maze::position T;
     
+    if (source == target) return true;
+    
     std::queue<T>  frontier;
-    std::set<T>    interior;
+    std::unordered_set<T>    interior;
     frontier.push(source);
     
     while (!frontier.empty()) {
@@ -111,8 +114,8 @@ void Maze::find_path(Maze::position const& source,
     if (source == target) return;
     
     std::queue<T>  frontier;
-    std::set<T>    interior;
-    std::map<T, T> previous;
+    std::unordered_set<T>    interior;
+    std::unordered_map<T, T> previous;
     frontier.push(source);
     
     bool found = false;
@@ -153,8 +156,8 @@ void Maze::calculate_displacement_mapping() {
     
     {
         std::queue<T>       frontier;
-        std::set<T>         interior;
-        std::map<T, size_t> cost;
+        std::unordered_set<T>         interior;
+        std::unordered_map<T, size_t> cost;
         for (Maze::position source : crates_starting_pos) {
             frontier.push(source);
             interior.insert(source);
@@ -205,8 +208,8 @@ void Maze::calculate_displacement_mapping() {
     
     {
         std::queue<T>       frontier;
-        std::set<T>         interior;
-        std::map<T, size_t> cost;
+        std::unordered_set<T>         interior;
+        std::unordered_map<T, size_t> cost;
         for (Maze::position source : crates_ending_pos) {
             frontier.push(source);
             interior.insert(source);
