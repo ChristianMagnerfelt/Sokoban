@@ -11,6 +11,21 @@
 class Maze {
 public:
     typedef std::pair<std::size_t, std::size_t> position;
+    /*
+    class position: public std::pair<std::size_t, std::size_t> {
+    public:
+        position(size_t x, size_t y):
+            std::pair<std::size_t, std::size_t>(x, y)
+        {}
+        position():
+            std::pair<std::size_t, std::size_t>()
+        {}
+        bool operator == (Maze::position p2) const {
+            return first == p2.first && second == p2.second;
+        }
+    };
+    */
+    
     class Tile {
     public:
         enum Type {
@@ -99,26 +114,22 @@ public:
     std::vector<Maze::position> const& get_crates_ending_pos() const;
 };
 
-/* Helper functions */
-
-inline
-Maze::position up(Maze::position const& pos) {
-    return Maze::position(pos.first, pos.second-1);
+namespace std {
+    template <>
+    class hash<Maze::position> {
+    public:
+        size_t operator () (Maze::position const& pos) const {
+            return std::hash<size_t>()(200*pos.first + pos.second);
+        }
+    };
 }
 
-inline
-Maze::position right(Maze::position const& pos) {
-    return Maze::position(pos.first+1, pos.second);
+inline Maze::position operator - (Maze::position p1, Maze::position p2) {
+    return Maze::position(p1.first - p2.first, p1.second - p2.second);
 }
 
-inline
-Maze::position down(Maze::position const& pos) {
-    return Maze::position(pos.first, pos.second+1);
-}
-
-inline
-Maze::position left(Maze::position const& pos) {
-    return Maze::position(pos.first-1, pos.second);
+inline Maze::position operator + (Maze::position p1, Maze::position p2) {
+    return Maze::position(p1.first + p2.first, p1.second + p2.second);
 }
 
 inline std::ostream& operator << (std::ostream& stream, Maze::position pos) {
@@ -142,10 +153,6 @@ inline std::ostream& operator << (std::ostream& stream, Maze const& maze) {
         stream << std::endl;
     }
     return stream;
-}
-
-inline Maze::position operator - (Maze::position p1, Maze::position p2) {
-    return Maze::position(p1.first - p2.first, p1.second - p2.second);
 }
 
 #endif

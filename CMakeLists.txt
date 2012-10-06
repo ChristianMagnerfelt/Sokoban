@@ -29,6 +29,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif ()
 
 add_executable(client
+    direction.cc
     main.cc
     maze.cc
     node.cc
