@@ -94,7 +94,7 @@ void Node::get_predecessors(std::queue<Node>& nodes) const {
             std::string code = codes[j];
             Maze::position crate = implementation->crates_starting_pos[i];
             Maze::position player = (*dir)(crate);
-            if (implementation->maze.walkable(player, implementation->crates_starting_pos)
+            if (implementation->maze.isWalkable(player, implementation->crates_starting_pos)
              && implementation->maze.reachable(player, get_player_starting_pos(), implementation->crates_starting_pos)) {
 //                if (walkable(player) && is_marked(player)) {
                 std::vector<Maze::position> new_crates_starting_pos
@@ -102,7 +102,7 @@ void Node::get_predecessors(std::queue<Node>& nodes) const {
                 player = (*dir)(player);
                 crate  = (*dir)(crate);
                 std::string path = code;
-                while (implementation->maze.walkable(player, implementation->crates_starting_pos)) {
+                while (implementation->maze.isWalkable(player, implementation->crates_starting_pos)) {
                     new_crates_starting_pos[i] = crate;
                     nodes.push(Node(*this, player, new_crates_starting_pos, implementation->crates_starting_pos, path));
                     player = (*dir)(player);
@@ -132,14 +132,14 @@ void Node::get_successors(std::queue<Node>& nodes) const {
             else if (j == 3)
                 player = right(crate);
             Maze::position player_start_pos = player;
-            if (implementation->maze.walkable(player, implementation->crates_ending_pos)
+            if (implementation->maze.isWalkable(player, implementation->crates_ending_pos)
              && implementation->maze.reachable(player, get_player_ending_pos(), implementation->crates_ending_pos)) {
                 std::vector<Maze::position> new_crates_ending_pos
                                             = implementation->crates_ending_pos;
                 player = (*dir)(player);
                 crate  = (*dir)(crate);
                 std::string path = code;
-                while (implementation->maze.walkable(crate, implementation->crates_ending_pos)) {
+                while (implementation->maze.isWalkable(crate, implementation->crates_ending_pos)) {
                     new_crates_ending_pos[i] = crate;
                     if ((implementation->maze(up(crate)).type == Maze::Tile::Obstacle && implementation->maze(right(crate)).type == Maze::Tile::Obstacle)
                      || (implementation->maze(right(crate)).type == Maze::Tile::Obstacle && implementation->maze(down(crate)).type == Maze::Tile::Obstacle)

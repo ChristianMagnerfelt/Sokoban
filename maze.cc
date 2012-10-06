@@ -3,17 +3,23 @@
 #include <limits>
 #include <map>
 #include <set>
+#include <algorithm>
+#include <iostream>
 
 #include "maze.h"
 
 Maze::Tile::Tile():
     type(Maze::Tile::Floor),
     source_displacement(std::numeric_limits<size_t>::max()),
-    target_displacement(std::numeric_limits<size_t>::max())
+    target_displacement(std::numeric_limits<size_t>::max()),
+    walkable(true)
 {}
 
-bool Maze::Tile::walkable() const {
-    return type != Maze::Tile::Obstacle;
+inline bool Maze::Tile::isWalkable() const { return walkable; }
+
+void Maze::Tile::setType(Maze::Tile::Type value) {
+	walkable = (value == Maze::Tile::Obstacle)?false:true;
+	type = value;
 }
 
 Maze::Maze():
@@ -38,19 +44,9 @@ Maze::Tile& Maze::operator () (size_t x, size_t y) {
     return tiles[y][x];
 }
 
-//void Maze::get_neighbors(Maze::position pos,
-//                         std::queue<Maze::position>& neighbors) const {
-//    if (pos.first != 0 && (*this)(pos.first-1, pos.second).walkable())
-//        neighbors.push(Maze::position(pos.first-1, pos.second));
-//    if (pos.second < (*this).height() && pos.first < tiles[pos.second].size()
-//                        &&  (*this)(pos.first+1, pos.second).walkable())
-//        neighbors.push(Maze::position(pos.first+1, pos.second));
-//    if (pos.second != 0 && (*this)(pos.first, pos.second-1).walkable())
-//        neighbors.push(Maze::position(pos.first, pos.second-1));
-//    if (pos.second < (*this).height()-1
-//                        && (*this)(pos.first, pos.second+1).walkable())
-//        neighbors.push(Maze::position(pos.first, pos.second+1));
-//}
+inline bool Maze::isTileWalkable(const Maze::position & pos) const {
+	return tiles[pos.second][pos.first].isWalkable();
+}
 
 size_t Maze::height() const {
     return tiles.size();
@@ -68,27 +64,24 @@ bool Maze::valid(Maze::position const& pos) const {
     return pos.second < height() && pos.first < width(pos.second);
 }
 
-bool Maze::walkable(Maze::position const& pos,
-                    std::vector<Maze::position> const& obstacles) const {
-    if ((*this)(pos).type == Maze::Tile::Obstacle)
-        return false;
-    for (Maze::position const& crate_pos : obstacles) {
-        if (crate_pos == pos) return false;
-    }
-    return true;
+bool Maze::isWalkable(const Maze::position & pos, const std::vector<Maze::position> & obstacles) const {
+    if(!isTileWalkable(pos))
+    	return false;
+    else
+    	return (std::find(obstacles.begin(), obstacles.end(), pos) == obstacles.end())?true:false;
 }
 
-void Maze::get_neighbors(std::queue<Maze::position>& neighbors,
-                         Maze::position const& current,
-                         std::vector<Maze::position> const& obstacles) const {
-    if (valid(up(current)) && walkable(up(current), obstacles))
-        neighbors.push(up(current));
-    if (valid(right(current)) && walkable(right(current), obstacles))
-        neighbors.push(right(current));
-    if (valid(down(current)) && walkable(down(current), obstacles))
-        neighbors.push(down(current));
-    if (valid(left(current)) && walkable(left(current), obstacles))
-        neighbors.push(left(current));
+void Maze::get_neighbors(std::queue<Maze::position>& neighbors, 
+						Maze::position const& current, 
+						std::vector<Maze::position> const& obstacles) const {
+    if (valid(up(current)) && isWalkable(up(current), obstacles))
+        neighbors.emplace(up(current));
+    if (valid(right(current)) && isWalkable(right(current), obstacles))
+        neighbors.emplace(right(current));
+    if (valid(down(current)) && isWalkable(down(current), obstacles))
+        neighbors.emplace(down(current));
+    if (valid(left(current)) && isWalkable(left(current), obstacles))
+        neighbors.emplace(left(current));
 }
 
 bool Maze::reachable(Maze::position const& source,

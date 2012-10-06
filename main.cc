@@ -353,15 +353,15 @@ int main(int pArgC, char* pArgs[]) {
             if (line[x] == '+') {
                 maze.set_player_starting_pos(Maze::position(x, y));
                 player_in_maze = true;
-                maze(x, y).type = Maze::Tile::Dest;
+                maze(x, y).setType(Maze::Tile::Dest);
                 maze.add_crates_ending_pos(Maze::position(x, y));
             }
             if (line[x] == '.') {
-                maze(x, y).type = Maze::Tile::Dest;
+                maze(x, y).setType(Maze::Tile::Dest);
                 maze.add_crates_ending_pos(Maze::position(x, y));
             }
             if (line[x] == '*') {
-                maze(x, y).type = Maze::Tile::Dest;
+                maze(x, y).setType(Maze::Tile::Dest);
                 maze.add_crates_ending_pos(Maze::position(x, y));
                 maze.add_crates_starting_pos(Maze::position(x, y));
             }
@@ -370,10 +370,10 @@ int main(int pArgC, char* pArgs[]) {
                 player_ending_pos.push_back(Maze::position(x, y));
             }
             if (line[x] == '#') {
-                maze(x, y).type = Maze::Tile::Obstacle;
+                maze(x, y).setType(Maze::Tile::Obstacle);
             }
             if (line[x] == ' ') {
-                maze(x, y).type = Maze::Tile::Floor;
+                maze(x, y).setType(Maze::Tile::Floor);
                 player_ending_pos.push_back(Maze::position(x, y));
             }
         }
