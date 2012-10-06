@@ -103,7 +103,7 @@ void reverse_best_first_search(Maze const& maze,
                 std::vector<Node>,
                 Comp_Source_Displacement>   frontier;
     std::unordered_set<Node>                          interior;
-    std::unordered_map<Node, Node>                    previous;
+    //std::unordered_map<Node, Node>                    previous;
     for (Node const& node : root_nodes) {
         frontier.push(node);
     }
@@ -123,7 +123,7 @@ void reverse_best_first_search(Maze const& maze,
             if (interior.find(neighbor) == interior.end()
 //                && neighbor.source_displacement() == std::numeric_limits<size_t>::max()
                 ) {
-                previous[neighbor] = current;
+                //previous[neighbor] = current;
                 if (neighbor.is_source()) {
                     found = true;
                     target = neighbor;
@@ -141,7 +141,8 @@ void reverse_best_first_search(Maze const& maze,
     Node current = target;
     while (current) {
         steps.push_back(current);
-        current = previous[current];
+        //current = previous[current];
+        current = current.get_parent();
     }
 }
 

@@ -6,6 +6,7 @@
 class Node::Implementation {
 public:
     Maze                        const& maze;
+    Node                        parent;
     Maze::position              player_starting_pos;
     std::vector<Maze::position> crates_starting_pos;
     std::vector<Maze::position> crates_ending_pos;
@@ -15,6 +16,7 @@ public:
                    Maze::position              const& player_starting_pos,
                    std::vector<Maze::position> const& crates_pos):
         maze(maze),
+        parent(),
         player_starting_pos(player_starting_pos),
         crates_starting_pos(crates_pos),
         crates_ending_pos(crates_pos)
@@ -25,6 +27,7 @@ public:
                    std::vector<Maze::position> const& crates_ending_pos,
                    std::string                 const& path):
         maze(node.implementation->maze),
+        parent(node),
         player_starting_pos(player_starting_pos),
         crates_starting_pos(crates_starting_pos),
         crates_ending_pos(crates_ending_pos),
@@ -209,6 +212,7 @@ bool Node::operator == (Node const& other) const {
         }
     }
     
+    if (get_player_starting_pos() != other.get_player_starting_pos()) return false;
     return get_path() == other.get_path();
 }
 
@@ -231,6 +235,10 @@ size_t Node::hash () const {
         for (Maze::position const& pos : c) hash_string << pos;
     }
     return std::hash<std::string>()(hash_string.str());
+}
+
+Node const& Node::get_parent() const {
+    return implementation->parent;
 }
 
 Maze::position Node::get_player_starting_pos() const {
