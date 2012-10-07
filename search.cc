@@ -178,7 +178,8 @@ void threaded_bidirectional_search(Maze const& maze,
             
             // Insert new non-visted nodes to forward priority queue
             std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-                if (interior_fw.find(neighbor) == interior_fw.end()) {
+                if (interior_fw.find(neighbor) == interior_fw.end()
+                && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
                     previous_fw[neighbor] = current;
                     interior_fw.insert(neighbor);
                     frontier_fw.push(neighbor);
