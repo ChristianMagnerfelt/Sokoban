@@ -28,7 +28,10 @@ void bidirectional_search(Maze const& maze,
                           std::vector<Node> const& initial_nodes,
                           std::vector<Node> const& terminal_nodes,
                           std::vector<Node>& steps);
-
+void threaded_bidirectional_search(Maze const& maze,
+                          std::vector<Node> const& initial_nodes,
+                          std::vector<Node> const& terminal_nodes,
+                          std::vector<Node>& steps);
 
 int main(int pArgC, char* pArgs[]) {
     
@@ -121,7 +124,7 @@ int main(int pArgC, char* pArgs[]) {
     std::vector<Node> steps;
     //reverse_best_first_search(maze, terminal_nodes, steps);
 	//forward_best_first_search(maze, initial_nodes, steps);
-	bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
+	threaded_bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
     
     /* We now have a sequence of nodes that leads to the goal 
      * Translate to player movements.

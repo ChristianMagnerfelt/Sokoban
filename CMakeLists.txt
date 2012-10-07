@@ -9,7 +9,7 @@ set(CMAKE_BUILD_TYPE Release)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pg")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pg -pthread")
     ADD_DEFINITIONS(
         -Wall
         -Wextra
