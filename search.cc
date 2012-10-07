@@ -127,7 +127,6 @@ void forward_best_first_search(Maze const& maze,
     }
 }
 
-
 void bidirectional_search(Maze const& maze,
                           std::vector<Node> const& initial_nodes,
                           std::vector<Node> const& terminal_nodes,
@@ -164,20 +163,21 @@ void bidirectional_search(Maze const& maze,
     while ((!found_fw && !frontier_fw.empty()) && (!found_rv && !frontier_rv.empty())) {
 		i++;
 		if (frontier_fw.empty() || frontier_rv.empty()) return;
-
+        
 		// Forward
 		{ 
         	Node current = frontier_fw.top();
             frontier_fw.pop();
             interior_fw.insert(current);
-
+            
 			// Get all successor nodes for this node
 			neighbors_fw.clear();
             current.get_successors(neighbors_fw);
             
             // Insert new non-visted nodes to forward priority queue
             std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-                if (interior_fw.find(neighbor) == interior_fw.end()) {
+                if (interior_fw.find(neighbor) == interior_fw.end()
+                 && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
                     previous_fw[neighbor] = current;
                     interior_fw.insert(neighbor);
                     frontier_fw.push(neighbor);
