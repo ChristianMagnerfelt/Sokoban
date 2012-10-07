@@ -157,66 +157,81 @@ void bidirectional_search(Maze const& maze,
     bool found_rv = false;
     Node target_rv;
     
+    std::vector<Node> neighbors_fw;
+    std::vector<Node> neighbors_rv;
+      
     int i = 0;
-    while ((!found_fw && !frontier_fw.empty())
-        && (!found_rv && !frontier_rv.empty())) {
-        i++;
-        if (frontier_fw.empty() || frontier_rv.empty()) return;
-        
-//        if (i % 2 == 0)
-        {   // Forward
-            Node current = frontier_fw.top();
+    while ((!found_fw && !frontier_fw.empty()) && (!found_rv && !frontier_rv.empty())) {
+		i++;
+		if (frontier_fw.empty() || frontier_rv.empty()) return;
+
+		// Forward
+		{ 
+        	Node current = frontier_fw.top();
             frontier_fw.pop();
             interior_fw.insert(current);
-            std::queue<Node> neighbors;
-            current.get_successors(neighbors);
-            while (!neighbors.empty()) {
-                Node neighbor = neighbors.front();
-                neighbors.pop();
+
+			// Get all successor nodes for this node
+			neighbors_fw.clear();
+            current.get_successors(neighbors_fw);
+            
+            // Insert new non-visted nodes to forward priority queue
+            std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
                 if (interior_fw.find(neighbor) == interior_fw.end()) {
                     previous_fw[neighbor] = current;
+                    interior_fw.insert(neighbor);
+                    frontier_fw.push(neighbor);
+                }
+            });
+        }
+        
+        // Reverse
+		{
+        	Node current = frontier_rv.top();
+        	frontier_rv.pop();
+        	interior_rv.insert(current);
+        	
+        	// Get all predecessor nodes for this node
+        	neighbors_rv.clear();
+			current.get_predecessors(neighbors_rv);
+			
+			// Insert new non-visted nodes to reverse priority queue
+			std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
+                if (interior_rv.find(neighbor) == interior_rv.end()) {
+                    previous_rv[neighbor] = current;
+                    interior_rv.insert(neighbor);
+                    frontier_rv.push(neighbor);
+                }
+            });
+		}
+		
+		// Find overlapping between forward and reverse
+		std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
+			if (interior_fw.find(neighbor) != interior_fw.end()) {
+				found_rv = found_fw = true;
+				target_rv = target_fw = neighbor;
+				return;
+			}  		
+		});
+		
+		// Find overlapping between forward and reverse
+		std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
+			if (interior_rv.find(neighbor) != interior_rv.end()) {
+				found_rv = found_fw = true;
+				target_rv = target_fw = neighbor;
+				return;
+			} 		
+		});	
 //                    if (neighbor.is_target()) {
 //                        found_fw = true;
 //                        target_fw = neighbor;
 //                        break;
-//                    }
-                    if (interior_rv.find(neighbor) != interior_rv.end()) {
-                        found_rv = found_fw = true;
-                        target_rv = target_rv = neighbor;
-                        break;
-                    }
-                    interior_fw.insert(neighbor);
-                    frontier_fw.push(neighbor);
-                }
-            }
-        }
-        
-        {   // Reverse
-            Node current = frontier_rv.top();
-            frontier_rv.pop();
-            interior_rv.insert(current);
-            std::queue<Node> neighbors;
-            current.get_predecessors(neighbors);
-            while (!neighbors.empty()) {
-                Node neighbor = neighbors.front();
-                neighbors.pop();
-                if (interior_rv.find(neighbor) == interior_rv.end()) {
-                    previous_rv[neighbor] = current;
+//                    }              
 //                    if (neighbor.is_source()) {
 //                        found_rv = true;
 //                        target_rv = neighbor;
 //                        break;
 //                    }
-                    if (interior_fw.find(neighbor) != interior_fw.end()) {
-                        found_rv = found_fw = true;
-                        target_rv = target_rv = neighbor;
-                        break;
-                    }
-                    interior_rv.insert(neighbor);
-                    frontier_rv.push(neighbor);
-                }
-            }
-        }
     }
     
     if (!found_fw && !found_rv) return;

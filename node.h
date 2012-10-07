@@ -81,11 +81,21 @@ public:
      * That is, all legal movements of a single crate after
      * which the movement described by this node is legal.
      */
+    void get_predecessors(std::vector<Node>& nodes) const;
+    /**
+     * Get all legal next crate movements.
+     */
+    void get_successors(std::vector<Node>& nodes) const;
+    /**
+     * Get all legal previous crate movements.
+     * That is, all legal movements of a single crate after
+     * which the movement described by this node is legal.
+     */
     void get_predecessors(std::queue<Node>& nodes) const;
     /**
      * Get all legal next crate movements.
      */
-    void get_successors(std::queue<Node>& nodes) const;
+    void get_successors(std::queue<Node>& nodes) const;    
     /**
      * For std::set and std::map. Makes no semantic sense
      * whatsoever.
