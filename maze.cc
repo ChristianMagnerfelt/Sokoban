@@ -71,16 +71,22 @@ void Maze::get_neighbors(std::queue<Maze::position>& neighbors,
         neighbors.emplace(left(current));
 }
 
+namespace {
+    size_t current_mark = 0;
+}
+
 bool Maze::reachable(Maze::position const& source,
                      Maze::position const& target,
                      std::vector<Maze::position> const& obstacles) const {
     
     typedef Maze::position T;
     
+    current_mark++;
+    
     if (source == target) return true;
     
     std::queue<T>  frontier;
-    std::unordered_set<T>    interior;
+    //std::unordered_set<T>    interior;
     frontier.push(source);
     
     while (!frontier.empty()) {
@@ -88,20 +94,58 @@ bool Maze::reachable(Maze::position const& source,
         T current = frontier.front();
         frontier.pop();
 //            if (interior.find(current) != interior.end()) continue;
-        interior.insert(current);
+        //interior.insert(current);
+        (*this)(current).mark = current_mark;
         std::queue<T> neighbors;
         get_neighbors(neighbors, current, obstacles);
         while (!neighbors.empty()) {
             T neighbor = neighbors.front();
             neighbors.pop();
-            if (interior.find(neighbor) == interior.end()) {
+            if ((*this)(neighbor).mark != current_mark) {
                 if (neighbor == target) return true;
                 frontier.push(neighbor);
-                interior.insert(neighbor);
+                //interior.insert(neighbor);
+                (*this)(neighbor).mark = current_mark;
             }
         }
     }
     return false;
+}
+
+void Maze::mark_reachable(Maze::position const& source,
+                          std::vector<Maze::position> const& obstacles) const {
+    
+    typedef Maze::position T;
+    
+    current_mark++;
+    
+    std::queue<T>  frontier;
+    //std::unordered_set<T>    interior;
+    frontier.push(source);
+    
+    while (!frontier.empty()) {
+        if (frontier.empty()) return;
+        T current = frontier.front();
+        frontier.pop();
+//            if (interior.find(current) != interior.end()) continue;
+        //interior.insert(current);
+        (*this)(current).mark = current_mark;
+        std::queue<T> neighbors;
+        get_neighbors(neighbors, current, obstacles);
+        while (!neighbors.empty()) {
+            T neighbor = neighbors.front();
+            neighbors.pop();
+            if ((*this)(neighbor).mark != current_mark) {
+                frontier.push(neighbor);
+                //interior.insert(neighbor);
+                (*this)(neighbor).mark = current_mark;
+            }
+        }
+    }
+}
+
+bool Maze::is_marked(Maze::position const& pos) const {
+    return (*this)(pos).mark == current_mark;
 }
 
 void Maze::find_path(Maze::position const& source,

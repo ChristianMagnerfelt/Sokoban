@@ -16,6 +16,8 @@ class Tile
         std::size_t source_displacement;
         std::size_t target_displacement;
         
+        mutable std::size_t mark;
+        
         Tile();
         inline bool isWalkable() const { return walkable; }
     private:

@@ -70,6 +70,19 @@ public:
     bool reachable(Maze::position const& source,
                    Maze::position const& target,
                    std::vector<Maze::position> const& obstacles) const;
+
+    /**
+     * Mark all positions reachable from source
+     * board, given obstacles.
+     */    
+    void mark_reachable(Maze::position const& source,
+                   std::vector<Maze::position> const& obstacles) const;
+    
+    /**
+     * Check if the position was marked by the last call
+     * to mark_reachable
+     */
+    bool is_marked(Maze::position const& pos) const;
     
     void calculate_displacement_mapping();
     
