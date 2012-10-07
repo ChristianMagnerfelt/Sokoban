@@ -160,32 +160,53 @@ void threaded_bidirectional_search(Maze const& maze,
     
     std::vector<Node> neighbors_fw;
     std::vector<Node> neighbors_rv;
-      
+    
+    // thread variables
+    bool kill = false;
+    bool wait = true;
+    bool done = false;
+  
+	// Forward
+	std::thread th([&](){
+		while(!kill)
+		{
+			if(wait)
+			{
+				std::this_thread::yield();
+			}
+			else
+			{
+				Node current = frontier_fw.top();
+			    frontier_fw.pop();
+			    interior_fw.insert(current);
+
+				// Get all successor nodes for this node
+				neighbors_fw.clear();
+			    current.get_successors(neighbors_fw);
+			    
+			    // Insert new non-visted nodes to forward priority queue
+			    std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
+			        if (interior_fw.find(neighbor) == interior_fw.end()
+			        && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
+			            previous_fw[neighbor] = current;
+			            interior_fw.insert(neighbor);
+			            frontier_fw.push(neighbor);
+			        }
+			    });
+			    wait = true;
+			    done = true;
+	        }
+        }
+        return;
+    });
+              
     int i = 0;
     while ((!found_fw && !frontier_fw.empty()) && (!found_rv && !frontier_rv.empty())) {
 		i++;
 		if (frontier_fw.empty() || frontier_rv.empty()) return;
-
-		// Forward
-		std::thread th([&](){
-        	Node current = frontier_fw.top();
-            frontier_fw.pop();
-            interior_fw.insert(current);
-
-			// Get all successor nodes for this node
-			neighbors_fw.clear();
-            current.get_successors(neighbors_fw);
-            
-            // Insert new non-visted nodes to forward priority queue
-            std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-                if (interior_fw.find(neighbor) == interior_fw.end()
-                && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
-                    previous_fw[neighbor] = current;
-                    interior_fw.insert(neighbor);
-                    frontier_fw.push(neighbor);
-                }
-            });
-        });
+        
+        done = false;
+        wait = false;
         
         // Reverse
 		{
@@ -207,7 +228,8 @@ void threaded_bidirectional_search(Maze const& maze,
             });
 		}
 		
-		th.join();
+		while(!done){}
+		
 		
 		// Find overlapping between forward and reverse
 		std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
@@ -237,6 +259,8 @@ void threaded_bidirectional_search(Maze const& maze,
 //                        break;
 //                    }
     }
+    kill = true;
+    th.join();
     
     if (!found_fw && !found_rv) return;
     
