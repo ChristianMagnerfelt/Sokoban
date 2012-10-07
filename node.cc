@@ -146,6 +146,20 @@ void Node::get_predecessors(std::vector<Node>& nodes) const {
         }
     }
 }
+
+bool is_deadlock(Maze::position const& pos, Direction const& dir, Maze const& maze, std::vector<Maze::position> const& obstacles) {
+    return !maze.isWalkable(dir(pos), obstacles) &&
+        (
+            (maze(dir.right()(pos)).type == Tile::Obstacle
+                ||
+             maze(dir.left()(pos)).type == Tile::Obstacle)
+                &&
+            (maze(dir.left()(dir(pos))).type == Tile::Obstacle
+                ||
+             maze(dir.right()(dir(pos))).type == Tile::Obstacle)
+            );
+}
+
 void Node::get_successors(std::queue<Node>& nodes) const {
     //typedef Maze::position (*Dir) (Maze::position const&);
     static const Direction dirs[4] = { up, right, down, left };
@@ -167,17 +181,7 @@ void Node::get_successors(std::queue<Node>& nodes) const {
                 std::string path = code;
                 while (implementation->maze.isWalkable(crate, implementation->crates_ending_pos)) {
                     new_crates_ending_pos[i] = crate;
-                    if (!implementation->maze.isWalkable(dir(crate), implementation->crates_ending_pos) &&
-                            (
-                                (!implementation->maze.isWalkable(dir.right()(dir(crate)), implementation->crates_ending_pos)
-                                    &&
-                                 !implementation->maze.isWalkable(dir.right()(crate), implementation->crates_ending_pos))
-                                                ||
-                                (!implementation->maze.isWalkable(dir.left()(dir(crate)), implementation->crates_ending_pos)
-                                    &&
-                                 !implementation->maze.isWalkable(dir.left()(crate), implementation->crates_ending_pos))
-                                )) {
-                    } else {
+                    if (!is_deadlock(crate, dir, implementation->maze, implementation->crates_ending_pos)) {
                         nodes.push(Node(*this, player_start_pos, implementation->crates_ending_pos, new_crates_ending_pos, path));
                     }
                     player = dir(player);
@@ -188,6 +192,7 @@ void Node::get_successors(std::queue<Node>& nodes) const {
         }
     }
 }
+
 void Node::get_successors(std::vector<Node>& nodes) const {
     //typedef Maze::position (*Dir) (Maze::position const&);
     static const Direction dirs[4] = { up, right, down, left };
@@ -209,17 +214,7 @@ void Node::get_successors(std::vector<Node>& nodes) const {
                 std::string path = code;
                 while (implementation->maze.isWalkable(crate, implementation->crates_ending_pos)) {
                     new_crates_ending_pos[i] = crate;
-                    if (!implementation->maze.isWalkable(dir(crate), implementation->crates_ending_pos) &&
-                            (
-                                (!implementation->maze.isWalkable(dir.right()(dir(crate)), implementation->crates_ending_pos)
-                                    &&
-                                 !implementation->maze.isWalkable(dir.right()(crate), implementation->crates_ending_pos))
-                                                ||
-                                (!implementation->maze.isWalkable(dir.left()(dir(crate)), implementation->crates_ending_pos)
-                                    &&
-                                 !implementation->maze.isWalkable(dir.left()(crate), implementation->crates_ending_pos))
-                                )) {
-                    } else {
+                    if (!is_deadlock(crate, dir, implementation->maze, implementation->crates_ending_pos)) {
                         nodes.emplace_back(Node(*this, player_start_pos, implementation->crates_ending_pos, new_crates_ending_pos, path));
                     }
                     player = dir(player);
