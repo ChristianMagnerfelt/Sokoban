@@ -6,7 +6,8 @@ Tile::Tile():
     type(Floor),
     source_displacement(std::numeric_limits<std::size_t>::max()),
     target_displacement(std::numeric_limits<std::size_t>::max()),
-    walkable(true)
+    walkable(true),
+    mark(0)
 {}
 
 void Tile::setType(Type value) {
