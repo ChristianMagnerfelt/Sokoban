@@ -289,107 +289,42 @@ void bidirectional_search(Maze const& maze,
                           std::vector<Node> const& initial_nodes,
                           std::vector<Node> const& terminal_nodes,
                           std::vector<Node>& steps) {
-    
-    std::priority_queue<Node,
-                std::vector<Node>,
-                Comp_Target_Displacement>        frontier_fw;
-    std::unordered_set<Node>          interior_fw;
-    std::unordered_map<Node, Node>    previous_fw;
+    // Forward setup
+    CTDPriorityQueue frontier_fw;
+    std::unordered_set<Node> interior_fw;
+    std::unordered_map<Node, Node> previous_fw;
     for (Node const& node : initial_nodes) {
         frontier_fw.push(node);
     }
     
     bool found_fw = false;
-    Node target_fw;
+    Node target_fw;  
+    std::vector<Node> neighbors_fw;
     
-    std::priority_queue<Node,
-                std::vector<Node>,
-                Comp_Source_Displacement>        frontier_rv;
-    std::set<Node>          interior_rv;
-    std::map<Node, Node>    previous_rv;
+    // Reverse setup    
+	CSDPriorityQueue frontier_rv;
+    std::unordered_set<Node> interior_rv;
+    std::unordered_map<Node, Node> previous_rv;
+    
     for (Node const& node : terminal_nodes) {
         frontier_rv.push(node);
     }
     
     bool found_rv = false;
     Node target_rv;
-    
-    std::vector<Node> neighbors_fw;
     std::vector<Node> neighbors_rv;
-      
-    int i = 0;
+
     while ((!found_fw && !frontier_fw.empty()) && (!found_rv && !frontier_rv.empty())) {
-		i++;
 		if (frontier_fw.empty() || frontier_rv.empty()) return;
         
-		// Forward
-		{ 
-        	Node current = frontier_fw.top();
-            frontier_fw.pop();
-            interior_fw.insert(current);
-            
-			// Get all successor nodes for this node
-			neighbors_fw.clear();
-            current.get_successors(neighbors_fw);
-            
-            // Insert new non-visted nodes to forward priority queue
-            std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-                if (interior_fw.find(neighbor) == interior_fw.end()
-                 && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
-                    previous_fw[neighbor] = current;
-                    interior_fw.insert(neighbor);
-                    frontier_fw.push(neighbor);
-                }
-            });
-        }
-        
-        // Reverse
-		{
-        	Node current = frontier_rv.top();
-        	frontier_rv.pop();
-        	interior_rv.insert(current);
-        	
-        	// Get all predecessor nodes for this node
-        	neighbors_rv.clear();
-			current.get_predecessors(neighbors_rv);
-			
-			// Insert new non-visted nodes to reverse priority queue
-			std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
-                if (interior_rv.find(neighbor) == interior_rv.end()) {
-                    previous_rv[neighbor] = current;
-                    interior_rv.insert(neighbor);
-                    frontier_rv.push(neighbor);
-                }
-            });
-		}
+    	bidirectional_find_forward(frontier_fw, interior_fw, previous_fw, neighbors_fw);
+    
+		bidirectional_find_reverse(frontier_rv, interior_rv, previous_rv, neighbors_rv);
 		
-		// Find overlapping between forward and reverse
-		std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
-			if (interior_fw.find(neighbor) != interior_fw.end()) {
-				found_rv = found_fw = true;
-				target_rv = target_fw = neighbor;
-				return;
-			}  		
-		});
-		
-		// Find overlapping between forward and reverse
-		std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-			if (interior_rv.find(neighbor) != interior_rv.end()) {
-				found_rv = found_fw = true;
-				target_rv = target_fw = neighbor;
-				return;
-			} 		
-		});	
-//                    if (neighbor.is_target()) {
-//                        found_fw = true;
-//                        target_fw = neighbor;
-//                        break;
-//                    }              
-//                    if (neighbor.is_source()) {
-//                        found_rv = true;
-//                        target_rv = neighbor;
-//                        break;
-//                    }
+		find_overlapping_neighbors(neighbors_fw, interior_rv, found_rv, found_fw,
+							target_rv, target_fw);
+		find_overlapping_neighbors(neighbors_rv, interior_fw, found_rv, found_fw,
+							target_rv, target_fw);
     }
     
     if (!found_fw && !found_rv) return;
@@ -414,3 +349,60 @@ void bidirectional_search(Maze const& maze,
     }
 }
 
+
+void bidirectional_find_forward(CTDPriorityQueue & frontier_fw, 
+						std::unordered_set<Node> & interior_fw, 
+						std::unordered_map<Node, Node> & previous_fw,
+						std::vector<Node> & neighbors_fw) {
+	Node current = frontier_fw.top();
+	frontier_fw.pop();
+	interior_fw.insert(current);
+
+	// Get all successor nodes for this node
+	neighbors_fw.clear();
+	current.get_successors(neighbors_fw);
+
+	// Insert new non-visted nodes to forward priority queue
+	std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
+		if (interior_fw.find(neighbor) == interior_fw.end()
+		 && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
+		    previous_fw[neighbor] = current;
+		    interior_fw.insert(neighbor);
+		    frontier_fw.push(neighbor);
+		}
+	});
+}   
+void bidirectional_find_reverse(CSDPriorityQueue & frontier_rv, 
+						std::unordered_set<Node> & interior_rv, 
+						std::unordered_map<Node, Node> & previous_rv,
+						std::vector<Node> & neighbors_rv) {
+	Node current = frontier_rv.top();
+	frontier_rv.pop();
+	interior_rv.insert(current);
+
+	// Get all predecessor nodes for this node
+	neighbors_rv.clear();
+	current.get_predecessors(neighbors_rv);
+
+	// Insert new non-visted nodes to reverse priority queue
+	std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
+		if (interior_rv.find(neighbor) == interior_rv.end()) {
+		    previous_rv[neighbor] = current;
+		    interior_rv.insert(neighbor);
+		    frontier_rv.push(neighbor);
+		}
+	});						
+}
+void find_overlapping_neighbors(std::vector<Node> & neighbors, 
+							std::unordered_set<Node> & interior,
+							bool & found_rv, bool & found_fw,
+							Node & target_rv, Node & target_fw) {
+	// Find overlapping between forward and reverse
+	std::for_each(neighbors.begin(), neighbors.end(),[&](Node & neighbor) {
+		if (interior.find(neighbor) != interior.end()) {
+			found_rv = found_fw = true;
+			target_rv = target_fw = neighbor;
+			return;
+		} 		
+	});
+}
