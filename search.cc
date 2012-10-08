@@ -3,6 +3,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <thread>
+#include <chrono>
 
 std::string path_to_string(std::vector<Maze::position> const& path) {
     std::string solution_string = "";
@@ -128,139 +129,94 @@ void forward_best_first_search(Maze const& maze,
     }
 }
 
-
 void threaded_bidirectional_search(Maze const& maze,
                           std::vector<Node> const& initial_nodes,
                           std::vector<Node> const& terminal_nodes,
                           std::vector<Node>& steps) {
-    
-    std::priority_queue<Node,
-                std::vector<Node>,
-                Comp_Target_Displacement>        frontier_fw;
-    std::unordered_set<Node>          interior_fw;
-    std::unordered_map<Node, Node>    previous_fw;
+    // Forward setup
+    CTDPriorityQueue frontier_fw;
+    std::unordered_set<Node> interior_fw;
+    std::unordered_map<Node, Node> previous_fw;
     for (Node const& node : initial_nodes) {
         frontier_fw.push(node);
     }
     
     bool found_fw = false;
-    Node target_fw;
+    Node target_fw;  
+    std::vector<Node> neighbors_fw;
     
-    std::priority_queue<Node,
-                std::vector<Node>,
-                Comp_Source_Displacement>        frontier_rv;
-    std::set<Node>          interior_rv;
-    std::map<Node, Node>    previous_rv;
+    // Reverse setup    
+	CSDPriorityQueue frontier_rv;
+    std::unordered_set<Node> interior_rv;
+    std::unordered_map<Node, Node> previous_rv;
+    
     for (Node const& node : terminal_nodes) {
         frontier_rv.push(node);
     }
     
     bool found_rv = false;
     Node target_rv;
-    
-    std::vector<Node> neighbors_fw;
     std::vector<Node> neighbors_rv;
     
-    // thread variables
-    bool kill = false;
-    bool wait = true;
-    bool done = false;
-  
-	// Forward
+    //Threaded variables
+    volatile bool kill = false;
+    volatile bool work = false;
+    
+    std::chrono::microseconds dur(100);
+    
 	std::thread th([&](){
-		while(!kill)
+		while(true)
 		{
-			if(wait)
-			{
-				std::this_thread::yield();
+			if(work)
+			{	
+				if(frontier_rv.empty())
+				{
+					std::cout << "Empty reverse frontier" << std::endl;
+					work = false;
+					kill = true;
+					return;
+				}
+				//std::cout << "slave working" << std::endl;
+				bidirectional_find_reverse(frontier_rv, interior_rv, previous_rv, neighbors_rv);
+				work = false;
 			}
-			else
-			{
-				Node current = frontier_fw.top();
-			    frontier_fw.pop();
-			    interior_fw.insert(current);
-
-				// Get all successor nodes for this node
-				neighbors_fw.clear();
-			    current.get_successors(neighbors_fw);
-			    
-			    // Insert new non-visted nodes to forward priority queue
-			    std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-			        if (interior_fw.find(neighbor) == interior_fw.end()
-			        && neighbor.source_displacement() != std::numeric_limits<size_t>::max()) {
-			            previous_fw[neighbor] = current;
-			            interior_fw.insert(neighbor);
-			            frontier_fw.push(neighbor);
-			        }
-			    });
-			    wait = true;
-			    done = true;
-	        }
-        }
-        return;
-    });
-              
-    int i = 0;
-    while ((!found_fw && !frontier_fw.empty()) && (!found_rv && !frontier_rv.empty())) {
-		i++;
-		if (frontier_fw.empty() || frontier_rv.empty()) return;
-        
-        done = false;
-        wait = false;
-        
-        // Reverse
-		{
-        	Node current = frontier_rv.top();
-        	frontier_rv.pop();
-        	interior_rv.insert(current);
-        	
-        	// Get all predecessor nodes for this node
-        	neighbors_rv.clear();
-			current.get_predecessors(neighbors_rv);
 			
-			// Insert new non-visted nodes to reverse priority queue
-			std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
-                if (interior_rv.find(neighbor) == interior_rv.end()) {
-                    previous_rv[neighbor] = current;
-                    interior_rv.insert(neighbor);
-                    frontier_rv.push(neighbor);
-                }
-            });
+			if(kill)
+			{
+				work = false;
+				std::cout << "Killed!" << std::endl;
+				return;
+			}
+		}
+	});
+
+    while ((!found_fw) && (!found_rv)) {
+		if (frontier_fw.empty()) {
+				std::cout << "Empty forward frontier" << std::endl;
+				kill = true;
+				th.join();
+				return;	
 		}
 		
-		while(!done){}
+        work = true;
+        //std::cout << "main working" << std::endl;
+    	bidirectional_find_forward(frontier_fw, interior_fw, previous_fw, neighbors_fw);
 		
+		int i = 0;
+		while(true){
+			if(!work) break;
+			std::cout << "waiting " << i++ << std::endl;
+		}
 		
-		// Find overlapping between forward and reverse
-		std::for_each(neighbors_rv.begin(), neighbors_rv.end(),[&](Node & neighbor) {
-			if (interior_fw.find(neighbor) != interior_fw.end()) {
-				found_rv = found_fw = true;
-				target_rv = target_fw = neighbor;
-				return;
-			}  		
-		});
-		
-		// Find overlapping between forward and reverse
-		std::for_each(neighbors_fw.begin(), neighbors_fw.end(),[&](Node & neighbor) {
-			if (interior_rv.find(neighbor) != interior_rv.end()) {
-				found_rv = found_fw = true;
-				target_rv = target_fw = neighbor;
-				return;
-			} 		
-		});	
-//                    if (neighbor.is_target()) {
-//                        found_fw = true;
-//                        target_fw = neighbor;
-//                        break;
-//                    }              
-//                    if (neighbor.is_source()) {
-//                        found_rv = true;
-//                        target_rv = neighbor;
-//                        break;
-//                    }
+		find_overlapping_neighbors(neighbors_fw, interior_rv, found_rv, found_fw,
+							target_rv, target_fw);
+		find_overlapping_neighbors(neighbors_rv, interior_fw, found_rv, found_fw,
+							target_rv, target_fw);
     }
+    std::cout << "Finished" << std::endl;
     kill = true;
     th.join();
+    std::cout << "Joined" << std::endl;
     
     if (!found_fw && !found_rv) return;
     
@@ -283,6 +239,7 @@ void threaded_bidirectional_search(Maze const& maze,
         }
     }
 }
+
 
 
 void bidirectional_search(Maze const& maze,

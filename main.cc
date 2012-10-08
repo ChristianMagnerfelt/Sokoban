@@ -63,7 +63,7 @@ int main(int pArgC, char* pArgs[]) {
     // moved to the maze class
     for (int y = 0; y < height; y++) {
         lSocket.ReadLine(line);
-//        std::cout << line << std::endl;
+        std::cout << line << std::endl;
         maze.add_row(line.size());
         for (unsigned x = 0; x < line.size(); x++) {
             if (line[x] == '@') {
@@ -124,8 +124,8 @@ int main(int pArgC, char* pArgs[]) {
     std::vector<Node> steps;
     //reverse_best_first_search(maze, terminal_nodes, steps);
 	//forward_best_first_search(maze, initial_nodes, steps);
-	bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
-	//threaded_bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
+	//bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
+	threaded_bidirectional_search(maze, initial_nodes, terminal_nodes, steps);
     
     /* We now have a sequence of nodes that leads to the goal 
      * Translate to player movements.
