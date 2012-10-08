@@ -33,7 +33,10 @@ public:
         crates_starting_pos(crates_starting_pos),
         crates_ending_pos(crates_ending_pos),
         path(path)
-    {}
+    {
+        std::sort(this->crates_starting_pos.begin(), this->crates_starting_pos.end());
+        std::sort(this->crates_ending_pos.begin(), this->crates_ending_pos.end());
+    }
 };
 
 Node::Node():
@@ -232,29 +235,26 @@ void Node::get_successors(std::vector<Node>& nodes) const {
 
 bool Node::operator < (Node const& other) const {
     {
-        std::vector<Maze::position> c1 = implementation->crates_starting_pos;
-        std::vector<Maze::position> c2 = other.implementation->crates_starting_pos;
-        std::sort(c1.begin(), c1.end());
-        std::sort(c2.begin(), c2.end());
+        std::vector<Maze::position> const& c1 = implementation->crates_starting_pos;
+        std::vector<Maze::position> const& c2 = other.implementation->crates_starting_pos;
         
         for (size_t i = 0; i < c1.size(); i++) {
             if (c1[i] != c2[i]) return c1[i] < c2[i];
         }
     }
     {
-        std::vector<Maze::position> c1 = implementation->crates_ending_pos;
-        std::vector<Maze::position> c2 = other.implementation->crates_ending_pos;
-        std::sort(c1.begin(), c1.end());
-        std::sort(c2.begin(), c2.end());
+        std::vector<Maze::position> const& c1 = implementation->crates_ending_pos;
+        std::vector<Maze::position> const& c2 = other.implementation->crates_ending_pos;
         
         for (size_t i = 0; i < c1.size(); i++) {
             if (c1[i] != c2[i]) return c1[i] < c2[i];
         }
     }
     
+    /*
     if (implementation->maze.reachable(get_player_starting_pos(),
                   other.get_player_starting_pos(),
-                  implementation->crates_starting_pos)) return false;
+                  implementation->crates_starting_pos)) return false; */
     if (get_player_starting_pos() != other.get_player_starting_pos())
         return get_player_starting_pos() < other.get_player_starting_pos();
     return get_path() < other.get_path();
@@ -262,20 +262,16 @@ bool Node::operator < (Node const& other) const {
 
 bool Node::operator == (Node const& other) const {
     {
-        std::vector<Maze::position> c1 = implementation->crates_starting_pos;
-        std::vector<Maze::position> c2 = other.implementation->crates_starting_pos;
-        std::sort(c1.begin(), c1.end());
-        std::sort(c2.begin(), c2.end());
+        std::vector<Maze::position> const& c1 = implementation->crates_starting_pos;
+        std::vector<Maze::position> const& c2 = other.implementation->crates_starting_pos;
         
         for (size_t i = 0; i < c1.size(); i++) {
             if (c1[i] != c2[i]) return false;
         }
     }
     {
-        std::vector<Maze::position> c1 = implementation->crates_ending_pos;
-        std::vector<Maze::position> c2 = other.implementation->crates_ending_pos;
-        std::sort(c1.begin(), c1.end());
-        std::sort(c2.begin(), c2.end());
+        std::vector<Maze::position> const& c1 = implementation->crates_ending_pos;
+        std::vector<Maze::position> const& c2 = other.implementation->crates_ending_pos;
         
         for (size_t i = 0; i < c1.size(); i++) {
             if (c1[i] != c2[i]) return false;
