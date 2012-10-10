@@ -153,7 +153,8 @@ void Node::get_predecessors(std::vector<Node>& nodes) const {
 }
 
 bool is_deadlock(Maze::position const& pos, Direction const& dir, Maze const& maze, std::vector<Maze::position> const& obstacles) {
-    return !maze.isWalkable(dir(pos), obstacles) &&
+    return std::find(maze.get_crates_ending_pos().begin(), maze.get_crates_ending_pos().end(), pos) != maze.get_crates_ending_pos().end()
+        && !maze.isWalkable(dir(pos), obstacles) &&
         (
             (maze(dir.right()(pos)).type == Tile::Obstacle
                 ||
