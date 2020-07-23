@@ -78,14 +78,9 @@ bool Node::is_source() const {
 bool Node::is_target() const {
     if (!implementation) return false;
     for (Maze::position const& p1 : implementation->maze.crates_ending_pos) {
-        bool match = false;
         for (Maze::position const& p2 : implementation->crates_starting_pos) {
-            if (p1 == p2) {
-                match = true;
-                break;
-            }
+            if (p1 == p2) return false;
         }
-        if (!match) return false;
     }
     return true;
 }
